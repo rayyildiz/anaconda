@@ -50,8 +50,8 @@ type GeoSearchResult struct {
 	} `json:"query"`
 }
 
-func (a TwitterApi) GeoSearch(v url.Values) (c GeoSearchResult, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/geo/search.json", v, &c, _GET, response_ch}
-	return c, (<-response_ch).err
+func (api TwitterApi) GeoSearch(v url.Values) (c GeoSearchResult, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/geo/search.json", v, &c, _GET, responseCh}
+	return c, (<-responseCh).err
 }

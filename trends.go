@@ -38,27 +38,27 @@ type TrendLocation struct {
 }
 
 // https://developer.twitter.com/en/docs/trends/trends-for-location/api-reference/get-trends-place
-func (a TwitterApi) GetTrendsByPlace(id int64, v url.Values) (trendResp TrendResponse, err error) {
-	response_ch := make(chan response)
+func (api TwitterApi) GetTrendsByPlace(id int64, v url.Values) (trendResp TrendResponse, err error) {
+	responseCh := make(chan response)
 	v = cleanValues(v)
 	v.Set("id", strconv.FormatInt(id, 10))
-	a.queryQueue <- query{a.baseUrl + "/trends/place.json", v, &[]interface{}{&trendResp}, _GET, response_ch}
-	return trendResp, (<-response_ch).err
+	api.queryQueue <- query{api.baseUrl + "/trends/place.json", v, &[]interface{}{&trendResp}, _GET, responseCh}
+	return trendResp, (<-responseCh).err
 }
 
 // https://developer.twitter.com/en/docs/trends/locations-with-trending-topics/api-reference/get-trends-available
-func (a TwitterApi) GetTrendsAvailableLocations(v url.Values) (locations []TrendLocation, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/trends/available.json", v, &locations, _GET, response_ch}
-	return locations, (<-response_ch).err
+func (api TwitterApi) GetTrendsAvailableLocations(v url.Values) (locations []TrendLocation, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/trends/available.json", v, &locations, _GET, responseCh}
+	return locations, (<-responseCh).err
 }
 
 // https://developer.twitter.com/en/docs/trends/locations-with-trending-topics/api-reference/get-trends-closest
-func (a TwitterApi) GetTrendsClosestLocations(lat float64, long float64, v url.Values) (locations []TrendLocation, err error) {
-	response_ch := make(chan response)
+func (api TwitterApi) GetTrendsClosestLocations(lat float64, long float64, v url.Values) (locations []TrendLocation, err error) {
+	responseCh := make(chan response)
 	v = cleanValues(v)
 	v.Set("lat", strconv.FormatFloat(lat, 'f', 6, 64))
 	v.Set("long", strconv.FormatFloat(long, 'f', 6, 64))
-	a.queryQueue <- query{a.baseUrl + "/trends/closest.json", v, &locations, _GET, response_ch}
-	return locations, (<-response_ch).err
+	api.queryQueue <- query{api.baseUrl + "/trends/closest.json", v, &locations, _GET, responseCh}
+	return locations, (<-responseCh).err
 }

@@ -33,8 +33,8 @@ type Source struct {
 	Notifications_enabled bool
 }
 
-func (a TwitterApi) GetFriendshipsShow(v url.Values) (relationshipResponse RelationshipResponse, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/friendships/show.json", v, &relationshipResponse, _GET, response_ch}
-	return relationshipResponse, (<-response_ch).err
+func (api TwitterApi) GetFriendshipsShow(v url.Values) (relationshipResponse RelationshipResponse, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/friendships/show.json", v, &relationshipResponse, _GET, responseCh}
+	return relationshipResponse, (<-responseCh).err
 }

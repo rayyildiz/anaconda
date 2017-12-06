@@ -25,8 +25,8 @@ type photoSize struct {
 	Resize string `json:"resize"`
 }
 
-func (a TwitterApi) GetConfiguration(v url.Values) (conf Configuration, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/help/configuration.json", v, &conf, _GET, response_ch}
-	return conf, (<-response_ch).err
+func (api TwitterApi) GetConfiguration(v url.Values) (conf Configuration, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/help/configuration.json", v, &conf, _GET, responseCh}
+	return conf, (<-responseCh).err
 }

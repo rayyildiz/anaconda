@@ -43,15 +43,15 @@ func (sr *SearchResponse) GetNext(a *TwitterApi) (SearchResponse, error) {
 	return newSr, err
 }
 
-func (a TwitterApi) GetSearch(queryString string, v url.Values) (sr SearchResponse, err error) {
+func (api TwitterApi) GetSearch(queryString string, v url.Values) (sr SearchResponse, err error) {
 	v = cleanValues(v)
 	v.Set("q", queryString)
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/search/tweets.json", v, &sr, _GET, response_ch}
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/search/tweets.json", v, &sr, _GET, responseCh}
 
 	// We have to read from the response channel before assigning to timeline
 	// Otherwise this will happen before the responses have been written
-	resp := <-response_ch
+	resp := <-responseCh
 	err = resp.err
 	return sr, err
 }

@@ -5,50 +5,50 @@ import (
 	"strconv"
 )
 
-func (a TwitterApi) GetBlocksList(v url.Values) (c UserCursor, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/blocks/list.json", v, &c, _GET, response_ch}
-	return c, (<-response_ch).err
+func (api TwitterApi) GetBlocksList(v url.Values) (c UserCursor, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/blocks/list.json", v, &c, _GET, responseCh}
+	return c, (<-responseCh).err
 }
 
-func (a TwitterApi) GetBlocksIds(v url.Values) (c Cursor, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/blocks/ids.json", v, &c, _GET, response_ch}
-	return c, (<-response_ch).err
+func (api TwitterApi) GetBlocksIds(v url.Values) (c Cursor, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/blocks/ids.json", v, &c, _GET, responseCh}
+	return c, (<-responseCh).err
 }
 
-func (a TwitterApi) BlockUser(screenName string, v url.Values) (user User, err error) {
+func (api TwitterApi) BlockUser(screenName string, v url.Values) (user User, err error) {
 	v = cleanValues(v)
 	v.Set("screen_name", screenName)
-	return a.Block(v)
+	return api.Block(v)
 }
 
-func (a TwitterApi) BlockUserId(id int64, v url.Values) (user User, err error) {
+func (api TwitterApi) BlockUserId(id int64, v url.Values) (user User, err error) {
 	v = cleanValues(v)
 	v.Set("user_id", strconv.FormatInt(id, 10))
-	return a.Block(v)
+	return api.Block(v)
 }
 
-func (a TwitterApi) Block(v url.Values) (user User, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/blocks/create.json", v, &user, _POST, response_ch}
-	return user, (<-response_ch).err
+func (api TwitterApi) Block(v url.Values) (user User, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/blocks/create.json", v, &user, _POST, responseCh}
+	return user, (<-responseCh).err
 }
 
-func (a TwitterApi) UnblockUser(screenName string, v url.Values) (user User, err error) {
+func (api TwitterApi) UnblockUser(screenName string, v url.Values) (user User, err error) {
 	v = cleanValues(v)
 	v.Set("screen_name", screenName)
-	return a.Unblock(v)
+	return api.Unblock(v)
 }
 
-func (a TwitterApi) UnblockUserId(id int64, v url.Values) (user User, err error) {
+func (api TwitterApi) UnblockUserId(id int64, v url.Values) (user User, err error) {
 	v = cleanValues(v)
 	v.Set("user_id", strconv.FormatInt(id, 10))
-	return a.Unblock(v)
+	return api.Unblock(v)
 }
 
-func (a TwitterApi) Unblock(v url.Values) (user User, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/blocks/destroy.json", v, &user, _POST, response_ch}
-	return user, (<-response_ch).err
+func (api TwitterApi) Unblock(v url.Values) (user User, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/blocks/destroy.json", v, &user, _POST, responseCh}
+	return user, (<-responseCh).err
 }

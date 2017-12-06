@@ -20,11 +20,11 @@ type BaseResource struct {
 	Reset     int `json:"reset"`
 }
 
-func (a TwitterApi) GetRateLimits(r []string) (rateLimitStatusResponse RateLimitStatusResponse, err error) {
+func (api TwitterApi) GetRateLimits(r []string) (rateLimitStatusResponse RateLimitStatusResponse, err error) {
 	resources := strings.Join(r, ",")
 	v := url.Values{}
 	v.Set("resources", resources)
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/application/rate_limit_status.json", v, &rateLimitStatusResponse, _GET, response_ch}
-	return rateLimitStatusResponse, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/application/rate_limit_status.json", v, &rateLimitStatusResponse, _GET, responseCh}
+	return rateLimitStatusResponse, (<-responseCh).err
 }

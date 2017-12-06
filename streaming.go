@@ -276,9 +276,9 @@ func (s *Stream) start(urlStr string, v url.Values, method int) {
 	go s.loop(urlStr, v, method)
 }
 
-func (a TwitterApi) newStream(urlStr string, v url.Values, method int) *Stream {
+func (api TwitterApi) newStream(urlStr string, v url.Values, method int) *Stream {
 	stream := Stream{
-		api: a,
+		api: api,
 		C:   make(chan interface{}),
 	}
 
@@ -286,27 +286,27 @@ func (a TwitterApi) newStream(urlStr string, v url.Values, method int) *Stream {
 	return &stream
 }
 
-func (a TwitterApi) UserStream(v url.Values) (stream *Stream) {
-	return a.newStream(BaseUrlUserStream+"/user.json", v, _GET)
+func (api TwitterApi) UserStream(v url.Values) (stream *Stream) {
+	return api.newStream(BaseUrlUserStream+"/user.json", v, _GET)
 }
 
-func (a TwitterApi) PublicStreamSample(v url.Values) (stream *Stream) {
-	return a.newStream(BaseUrlStream+"/statuses/sample.json", v, _GET)
+func (api TwitterApi) PublicStreamSample(v url.Values) (stream *Stream) {
+	return api.newStream(BaseUrlStream+"/statuses/sample.json", v, _GET)
 }
 
-// XXX: To use this API authority is requied. but I dont have this. I cant test.
-func (a TwitterApi) PublicStreamFirehose(v url.Values) (stream *Stream) {
-	return a.newStream(BaseUrlStream+"/statuses/firehose.json", v, _GET)
+// XXX: To use this API authority is required. but I dont have this. I cant test.
+func (api TwitterApi) PublicStreamFirehose(v url.Values) (stream *Stream) {
+	return api.newStream(BaseUrlStream+"/statuses/firehose.json", v, _GET)
 }
 
 // XXX: PublicStream(Track|Follow|Locations) func is needed?
-func (a TwitterApi) PublicStreamFilter(v url.Values) (stream *Stream) {
-	return a.newStream(BaseUrlStream+"/statuses/filter.json", v, _POST)
+func (api TwitterApi) PublicStreamFilter(v url.Values) (stream *Stream) {
+	return api.newStream(BaseUrlStream+"/statuses/filter.json", v, _POST)
 }
 
-// XXX: To use this API authority is requied. but I dont have this. I cant test.
-func (a TwitterApi) SiteStream(v url.Values) (stream *Stream) {
-	return a.newStream(BaseUrlSiteStream+"/site.json", v, _GET)
+// XXX: To use this API authority is required. but I dont have this. I cant test.
+func (api TwitterApi) SiteStream(v url.Values) (stream *Stream) {
+	return api.newStream(BaseUrlSiteStream+"/site.json", v, _GET)
 }
 
 func jsonAsStruct(j []byte, path string, obj interface{}) (res bool) {

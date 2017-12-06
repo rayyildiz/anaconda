@@ -5,15 +5,15 @@ import (
 	"strconv"
 )
 
-func (a TwitterApi) GetUsersLookup(usernames string, v url.Values) (u []User, err error) {
+func (api TwitterApi) GetUsersLookup(usernames string, v url.Values) (u []User, err error) {
 	v = cleanValues(v)
 	v.Set("screen_name", usernames)
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/users/lookup.json", v, &u, _GET, response_ch}
-	return u, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/users/lookup.json", v, &u, _GET, responseCh}
+	return u, (<-responseCh).err
 }
 
-func (a TwitterApi) GetUsersLookupByIds(ids []int64, v url.Values) (u []User, err error) {
+func (api TwitterApi) GetUsersLookupByIds(ids []int64, v url.Values) (u []User, err error) {
 	var pids string
 	for w, i := range ids {
 		//pids += strconv.Itoa(i)
@@ -24,66 +24,66 @@ func (a TwitterApi) GetUsersLookupByIds(ids []int64, v url.Values) (u []User, er
 	}
 	v = cleanValues(v)
 	v.Set("user_id", pids)
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/users/lookup.json", v, &u, _GET, response_ch}
-	return u, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/users/lookup.json", v, &u, _GET, responseCh}
+	return u, (<-responseCh).err
 }
 
-func (a TwitterApi) GetUsersShow(username string, v url.Values) (u User, err error) {
+func (api TwitterApi) GetUsersShow(username string, v url.Values) (u User, err error) {
 	v = cleanValues(v)
 	v.Set("screen_name", username)
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/users/show.json", v, &u, _GET, response_ch}
-	return u, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/users/show.json", v, &u, _GET, responseCh}
+	return u, (<-responseCh).err
 }
 
-func (a TwitterApi) GetUsersShowById(id int64, v url.Values) (u User, err error) {
+func (api TwitterApi) GetUsersShowById(id int64, v url.Values) (u User, err error) {
 	v = cleanValues(v)
 	v.Set("user_id", strconv.FormatInt(id, 10))
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/users/show.json", v, &u, _GET, response_ch}
-	return u, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/users/show.json", v, &u, _GET, responseCh}
+	return u, (<-responseCh).err
 }
 
-func (a TwitterApi) GetUserSearch(searchTerm string, v url.Values) (u []User, err error) {
+func (api TwitterApi) GetUserSearch(searchTerm string, v url.Values) (u []User, err error) {
 	v = cleanValues(v)
 	v.Set("q", searchTerm)
 	// Set other values before calling this method:
 	// page, count, include_entities
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/users/search.json", v, &u, _GET, response_ch}
-	return u, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/users/search.json", v, &u, _GET, responseCh}
+	return u, (<-responseCh).err
 }
 
-func (a TwitterApi) GetUsersSuggestions(v url.Values) (u []User, err error) {
+func (api TwitterApi) GetUsersSuggestions(v url.Values) (u []User, err error) {
 	v = cleanValues(v)
 	// Set other values before calling this method:
 	// page, count, include_entities
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/users/suggestions.json", v, &u, _GET, response_ch}
-	return u, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/users/suggestions.json", v, &u, _GET, responseCh}
+	return u, (<-responseCh).err
 }
 
 // PostUsersReportSpam : Reports and Blocks a User by screen_name
 // Reference : https://developer.twitter.com/en/docs/accounts-and-users/mute-block-report-users/api-reference/post-users-report_spam
 // If you don't want to block the user you should add
 // v.Set("perform_block", "false")
-func (a TwitterApi) PostUsersReportSpam(username string, v url.Values) (u User, err error) {
+func (api TwitterApi) PostUsersReportSpam(username string, v url.Values) (u User, err error) {
 	v = cleanValues(v)
 	v.Set("screen_name", username)
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/users/report_spam.json", v, &u, _POST, response_ch}
-	return u, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/users/report_spam.json", v, &u, _POST, responseCh}
+	return u, (<-responseCh).err
 }
 
 // PostUsersReportSpamById : Reports and Blocks a User by user_id
 // Reference : https://developer.twitter.com/en/docs/accounts-and-users/mute-block-report-users/api-reference/post-users-report_spam
 // If you don't want to block the user you should add
 // v.Set("perform_block", "false")
-func (a TwitterApi) PostUsersReportSpamById(id int64, v url.Values) (u User, err error) {
+func (api TwitterApi) PostUsersReportSpamById(id int64, v url.Values) (u User, err error) {
 	v = cleanValues(v)
 	v.Set("user_id", strconv.FormatInt(id, 10))
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/users/report_spam.json", v, &u, _POST, response_ch}
-	return u, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/users/report_spam.json", v, &u, _POST, responseCh}
+	return u, (<-responseCh).err
 }

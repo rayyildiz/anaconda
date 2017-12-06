@@ -21,8 +21,8 @@ type OEmbed struct {
 }
 
 // No authorization on this endpoint. Its the only one.
-func (a TwitterApi) GetOEmbed(v url.Values) (o OEmbed, err error) {
-	resp, err := http.Get(a.baseUrlV1() + "/statuses/oembed.json?" + v.Encode())
+func (api TwitterApi) GetOEmbed(v url.Values) (o OEmbed, err error) {
+	resp, err := http.Get(api.baseUrlV1() + "/statuses/oembed.json?" + v.Encode())
 	if err != nil {
 		return
 	}
@@ -33,10 +33,10 @@ func (a TwitterApi) GetOEmbed(v url.Values) (o OEmbed, err error) {
 }
 
 // Calls GetOEmbed with the corresponding id. Convenience wrapper for GetOEmbed()
-func (a TwitterApi) GetOEmbedId(id int64, v url.Values) (o OEmbed, err error) {
+func (api TwitterApi) GetOEmbedId(id int64, v url.Values) (o OEmbed, err error) {
 	v = cleanValues(v)
 	v.Set("id", strconv.FormatInt(id, 10))
-	resp, err := http.Get(a.baseUrlV1() + "/statuses/oembed.json?" + v.Encode())
+	resp, err := http.Get(api.baseUrlV1() + "/statuses/oembed.json?" + v.Encode())
 	if err != nil {
 		return
 	}
@@ -46,14 +46,14 @@ func (a TwitterApi) GetOEmbedId(id int64, v url.Values) (o OEmbed, err error) {
 	return
 }
 
-func (a TwitterApi) baseUrlV1() string {
-	if a.baseUrl == BaseUrl {
+func (api TwitterApi) baseUrlV1() string {
+	if api.baseUrl == BaseUrl {
 		return BaseUrlV1
 	}
 
-	if a.baseUrl == "" {
+	if api.baseUrl == "" {
 		return BaseUrlV1
 	}
 
-	return a.baseUrl
+	return api.baseUrl
 }

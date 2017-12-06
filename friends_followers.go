@@ -63,227 +63,227 @@ type FollowersIdsPage struct {
 
 // GetFriendshipsNoRetweets returns a collection of user_ids that the currently authenticated user does not want to receive retweets from.
 // It does not currently support the stringify_ids parameter.
-func (a TwitterApi) GetFriendshipsNoRetweets() (ids []int64, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/friendships/no_retweets/ids.json", nil, &ids, _GET, response_ch}
-	return ids, (<-response_ch).err
+func (api TwitterApi) GetFriendshipsNoRetweets() (ids []int64, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/friendships/no_retweets/ids.json", nil, &ids, _GET, responseCh}
+	return ids, (<-responseCh).err
 }
 
-func (a TwitterApi) GetFollowersIds(v url.Values) (c Cursor, err error) {
-	err = a.apiGet(a.baseUrl+"/followers/ids.json", v, &c)
+func (api TwitterApi) GetFollowersIds(v url.Values) (c Cursor, err error) {
+	err = api.apiGet(api.baseUrl+"/followers/ids.json", v, &c)
 	return
 }
 
 // Like GetFollowersIds, but returns a channel instead of a cursor and pre-fetches the remaining results
 // This channel is closed once all values have been fetched
-func (a TwitterApi) GetFollowersIdsAll(v url.Values) (result chan FollowersIdsPage) {
+func (api TwitterApi) GetFollowersIdsAll(v url.Values) (result chan FollowersIdsPage) {
 	result = make(chan FollowersIdsPage)
 
 	v = cleanValues(v)
 	go func(a TwitterApi, v url.Values, result chan FollowersIdsPage) {
 		// Cursor defaults to the first page ("-1")
-		next_cursor := "-1"
+		nextCursor := "-1"
 		for {
-			v.Set("cursor", next_cursor)
+			v.Set("cursor", nextCursor)
 			c, err := a.GetFollowersIds(v)
 
 			// throttledQuery() handles all rate-limiting errors
-			// if GetFollowersList() returns an error, it must be a different kind of error
+			// if GetFollowersList() returns an error, it must be api different kind of error
 
 			result <- FollowersIdsPage{c.Ids, err}
 
-			next_cursor = c.Next_cursor_str
-			if err != nil || next_cursor == "0" {
+			nextCursor = c.Next_cursor_str
+			if err != nil || nextCursor == "0" {
 				close(result)
 				break
 			}
 		}
-	}(a, v, result)
+	}(api, v, result)
 	return result
 }
 
-func (a TwitterApi) GetFriendsIds(v url.Values) (c Cursor, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/friends/ids.json", v, &c, _GET, response_ch}
-	return c, (<-response_ch).err
+func (api TwitterApi) GetFriendsIds(v url.Values) (c Cursor, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/friends/ids.json", v, &c, _GET, responseCh}
+	return c, (<-responseCh).err
 }
 
-func (a TwitterApi) GetFriendshipsLookup(v url.Values) (friendships []Friendship, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/friendships/lookup.json", v, &friendships, _GET, response_ch}
-	return friendships, (<-response_ch).err
+func (api TwitterApi) GetFriendshipsLookup(v url.Values) (friendships []Friendship, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/friendships/lookup.json", v, &friendships, _GET, responseCh}
+	return friendships, (<-responseCh).err
 }
 
-func (a TwitterApi) GetFriendshipsIncoming(v url.Values) (c Cursor, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/friendships/incoming.json", v, &c, _GET, response_ch}
-	return c, (<-response_ch).err
+func (api TwitterApi) GetFriendshipsIncoming(v url.Values) (c Cursor, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/friendships/incoming.json", v, &c, _GET, responseCh}
+	return c, (<-responseCh).err
 }
 
-func (a TwitterApi) GetFriendshipsOutgoing(v url.Values) (c Cursor, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/friendships/outgoing.json", v, &c, _GET, response_ch}
-	return c, (<-response_ch).err
+func (api TwitterApi) GetFriendshipsOutgoing(v url.Values) (c Cursor, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/friendships/outgoing.json", v, &c, _GET, responseCh}
+	return c, (<-responseCh).err
 }
 
-func (a TwitterApi) GetFollowersList(v url.Values) (c UserCursor, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/followers/list.json", v, &c, _GET, response_ch}
-	return c, (<-response_ch).err
+func (api TwitterApi) GetFollowersList(v url.Values) (c UserCursor, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/followers/list.json", v, &c, _GET, responseCh}
+	return c, (<-responseCh).err
 }
 
-func (a TwitterApi) GetFriendsList(v url.Values) (c UserCursor, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/friends/list.json", v, &c, _GET, response_ch}
-	return c, (<-response_ch).err
+func (api TwitterApi) GetFriendsList(v url.Values) (c UserCursor, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/friends/list.json", v, &c, _GET, responseCh}
+	return c, (<-responseCh).err
 }
 
 // Like GetFriendsList, but returns a channel instead of a cursor and pre-fetches the remaining results
 // This channel is closed once all values have been fetched
-func (a TwitterApi) GetFriendsListAll(v url.Values) (result chan FriendsPage) {
+func (api TwitterApi) GetFriendsListAll(v url.Values) (result chan FriendsPage) {
 	result = make(chan FriendsPage)
 
 	v = cleanValues(v)
 	go func(a TwitterApi, v url.Values, result chan FriendsPage) {
 		// Cursor defaults to the first page ("-1")
-		next_cursor := "-1"
+		nextCursor := "-1"
 		for {
-			v.Set("cursor", next_cursor)
+			v.Set("cursor", nextCursor)
 			c, err := a.GetFriendsList(v)
 
 			// throttledQuery() handles all rate-limiting errors
-			// if GetFriendsListAll() returns an error, it must be a different kind of error
+			// if GetFriendsListAll() returns an error, it must be api different kind of error
 
 			result <- FriendsPage{c.Users, err}
 
-			next_cursor = c.Next_cursor_str
-			if err != nil || next_cursor == "0" {
+			nextCursor = c.Next_cursor_str
+			if err != nil || nextCursor == "0" {
 				close(result)
 				break
 			}
 		}
-	}(a, v, result)
+	}(api, v, result)
 	return result
 }
 
 // Like GetFollowersList, but returns a channel instead of a cursor and pre-fetches the remaining results
 // This channel is closed once all values have been fetched
-func (a TwitterApi) GetFollowersListAll(v url.Values) (result chan FollowersPage) {
+func (api TwitterApi) GetFollowersListAll(v url.Values) (result chan FollowersPage) {
 	result = make(chan FollowersPage)
 
 	v = cleanValues(v)
 	go func(a TwitterApi, v url.Values, result chan FollowersPage) {
 		// Cursor defaults to the first page ("-1")
-		next_cursor := "-1"
+		nextCursor := "-1"
 		for {
-			v.Set("cursor", next_cursor)
+			v.Set("cursor", nextCursor)
 			c, err := a.GetFollowersList(v)
 
 			// throttledQuery() handles all rate-limiting errors
-			// if GetFollowersList() returns an error, it must be a different kind of error
+			// if GetFollowersList() returns an error, it must be api different kind of error
 
 			result <- FollowersPage{c.Users, err}
 
-			next_cursor = c.Next_cursor_str
-			if err != nil || next_cursor == "0" {
+			nextCursor = c.Next_cursor_str
+			if err != nil || nextCursor == "0" {
 				close(result)
 				break
 			}
 		}
-	}(a, v, result)
+	}(api, v, result)
 	return result
 }
 
-func (a TwitterApi) GetFollowersUser(id int64, v url.Values) (c Cursor, err error) {
+func (api TwitterApi) GetFollowersUser(id int64, v url.Values) (c Cursor, err error) {
 	v = cleanValues(v)
 	v.Set("user_id", strconv.FormatInt(id, 10))
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/followers/ids.json", v, &c, _GET, response_ch}
-	return c, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/followers/ids.json", v, &c, _GET, responseCh}
+	return c, (<-responseCh).err
 }
 
 // Like GetFriendsIds, but returns a channel instead of a cursor and pre-fetches the remaining results
 // This channel is closed once all values have been fetched
-func (a TwitterApi) GetFriendsIdsAll(v url.Values) (result chan FriendsIdsPage) {
+func (api TwitterApi) GetFriendsIdsAll(v url.Values) (result chan FriendsIdsPage) {
 	result = make(chan FriendsIdsPage)
 
 	v = cleanValues(v)
 	go func(a TwitterApi, v url.Values, result chan FriendsIdsPage) {
 		// Cursor defaults to the first page ("-1")
-		next_cursor := "-1"
+		nextCursor := "-1"
 		for {
-			v.Set("cursor", next_cursor)
+			v.Set("cursor", nextCursor)
 			c, err := a.GetFriendsIds(v)
 
 			// throttledQuery() handles all rate-limiting errors
-			// if GetFollowersList() returns an error, it must be a different kind of error
+			// if GetFollowersList() returns an error, it must be api different kind of error
 
 			result <- FriendsIdsPage{c.Ids, err}
 
-			next_cursor = c.Next_cursor_str
-			if err != nil || next_cursor == "0" {
+			nextCursor = c.Next_cursor_str
+			if err != nil || nextCursor == "0" {
 				close(result)
 				break
 			}
 		}
-	}(a, v, result)
+	}(api, v, result)
 	return result
 }
 
-func (a TwitterApi) GetFriendsUser(id int64, v url.Values) (c Cursor, err error) {
+func (api TwitterApi) GetFriendsUser(id int64, v url.Values) (c Cursor, err error) {
 	v = cleanValues(v)
 	v.Set("user_id", strconv.FormatInt(id, 10))
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/friends/ids.json", v, &c, _GET, response_ch}
-	return c, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/friends/ids.json", v, &c, _GET, responseCh}
+	return c, (<-responseCh).err
 }
 
 // FollowUserId follows the user with the specified userId.
 // This implements the /friendships/create endpoint, though the function name
 // uses the terminology 'follow' as this is most consistent with colloquial Twitter terminology.
-func (a TwitterApi) FollowUserId(userId int64, v url.Values) (user User, err error) {
+func (api TwitterApi) FollowUserId(userId int64, v url.Values) (user User, err error) {
 	v = cleanValues(v)
 	v.Set("user_id", strconv.FormatInt(userId, 10))
-	return a.postFriendshipsCreateImpl(v)
+	return api.postFriendshipsCreateImpl(v)
 }
 
 // FollowUserId follows the user with the specified screenname (username).
 // This implements the /friendships/create endpoint, though the function name
 // uses the terminology 'follow' as this is most consistent with colloquial Twitter terminology.
-func (a TwitterApi) FollowUser(screenName string) (user User, err error) {
+func (api TwitterApi) FollowUser(screenName string) (user User, err error) {
 	v := url.Values{}
 	v.Set("screen_name", screenName)
-	return a.postFriendshipsCreateImpl(v)
+	return api.postFriendshipsCreateImpl(v)
 }
 
-func (a TwitterApi) postFriendshipsCreateImpl(v url.Values) (user User, err error) {
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/friendships/create.json", v, &user, _POST, response_ch}
-	return user, (<-response_ch).err
+func (api TwitterApi) postFriendshipsCreateImpl(v url.Values) (user User, err error) {
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/friendships/create.json", v, &user, _POST, responseCh}
+	return user, (<-responseCh).err
 }
 
 // UnfollowUserId unfollows the user with the specified userId.
 // This implements the /friendships/destroy endpoint, though the function name
 // uses the terminology 'unfollow' as this is most consistent with colloquial Twitter terminology.
-func (a TwitterApi) UnfollowUserId(userId int64) (u User, err error) {
+func (api TwitterApi) UnfollowUserId(userId int64) (u User, err error) {
 	v := url.Values{}
 	v.Set("user_id", strconv.FormatInt(userId, 10))
 	// Set other values before calling this method:
 	// page, count, include_entities
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/friendships/destroy.json", v, &u, _POST, response_ch}
-	return u, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/friendships/destroy.json", v, &u, _POST, responseCh}
+	return u, (<-responseCh).err
 }
 
 // UnfollowUser unfollows the user with the specified screenname (username)
 // This implements the /friendships/destroy endpoint, though the function name
 // uses the terminology 'unfollow' as this is most consistent with colloquial Twitter terminology.
-func (a TwitterApi) UnfollowUser(screenname string) (u User, err error) {
+func (api TwitterApi) UnfollowUser(screenname string) (u User, err error) {
 	v := url.Values{}
 	v.Set("screen_name", screenname)
 	// Set other values before calling this method:
 	// page, count, include_entities
-	response_ch := make(chan response)
-	a.queryQueue <- query{a.baseUrl + "/friendships/destroy.json", v, &u, _POST, response_ch}
-	return u, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{api.baseUrl + "/friendships/destroy.json", v, &u, _POST, responseCh}
+	return u, (<-responseCh).err
 }

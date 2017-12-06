@@ -37,8 +37,8 @@ type Logger interface {
 // SetLogger sets the Logger used by the API client.
 // The default logger is silent. BasicLogger will log to STDERR
 // using the log package from the standard library.
-func (c *TwitterApi) SetLogger(l Logger) {
-	c.Log = l
+func (api *TwitterApi) SetLogger(l Logger) {
+	api.Log = l
 }
 
 type silentLogger struct {

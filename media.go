@@ -36,18 +36,18 @@ type VideoMedia struct {
 	Video            Video  `json:"video"`
 }
 
-func (a TwitterApi) UploadMedia(base64String string) (media Media, err error) {
+func (api TwitterApi) UploadMedia(base64String string) (media Media, err error) {
 	v := url.Values{}
 	v.Set("media_data", base64String)
 
 	var mediaResponse Media
 
-	response_ch := make(chan response)
-	a.queryQueue <- query{UploadBaseUrl + "/media/upload.json", v, &mediaResponse, _POST, response_ch}
-	return mediaResponse, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{UploadBaseUrl + "/media/upload.json", v, &mediaResponse, _POST, responseCh}
+	return mediaResponse, (<-responseCh).err
 }
 
-func (a TwitterApi) UploadVideoInit(totalBytes int, mimeType string) (chunkedMedia ChunkedMedia, err error) {
+func (api TwitterApi) UploadVideoInit(totalBytes int, mimeType string) (chunkedMedia ChunkedMedia, err error) {
 	v := url.Values{}
 	v.Set("command", "INIT")
 	v.Set("media_type", mimeType)
@@ -55,12 +55,12 @@ func (a TwitterApi) UploadVideoInit(totalBytes int, mimeType string) (chunkedMed
 
 	var mediaResponse ChunkedMedia
 
-	response_ch := make(chan response)
-	a.queryQueue <- query{UploadBaseUrl + "/media/upload.json", v, &mediaResponse, _POST, response_ch}
-	return mediaResponse, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{UploadBaseUrl + "/media/upload.json", v, &mediaResponse, _POST, responseCh}
+	return mediaResponse, (<-responseCh).err
 }
 
-func (a TwitterApi) UploadVideoAppend(mediaIdString string,
+func (api TwitterApi) UploadVideoAppend(mediaIdString string,
 	segmentIndex int, base64String string) error {
 
 	v := url.Values{}
@@ -71,19 +71,19 @@ func (a TwitterApi) UploadVideoAppend(mediaIdString string,
 
 	var emptyResponse interface{}
 
-	response_ch := make(chan response)
-	a.queryQueue <- query{UploadBaseUrl + "/media/upload.json", v, &emptyResponse, _POST, response_ch}
-	return (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{UploadBaseUrl + "/media/upload.json", v, &emptyResponse, _POST, responseCh}
+	return (<-responseCh).err
 }
 
-func (a TwitterApi) UploadVideoFinalize(mediaIdString string) (videoMedia VideoMedia, err error) {
+func (api TwitterApi) UploadVideoFinalize(mediaIdString string) (videoMedia VideoMedia, err error) {
 	v := url.Values{}
 	v.Set("command", "FINALIZE")
 	v.Set("media_id", mediaIdString)
 
 	var mediaResponse VideoMedia
 
-	response_ch := make(chan response)
-	a.queryQueue <- query{UploadBaseUrl + "/media/upload.json", v, &mediaResponse, _POST, response_ch}
-	return mediaResponse, (<-response_ch).err
+	responseCh := make(chan response)
+	api.queryQueue <- query{UploadBaseUrl + "/media/upload.json", v, &mediaResponse, _POST, responseCh}
+	return mediaResponse, (<-responseCh).err
 }

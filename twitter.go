@@ -132,40 +132,40 @@ func SetConsumerKey(consumer_key string) {
 
 //SetConsumerSecret will set the application-specific secret used in the initial OAuth process
 //This secret is listed on https://dev.twitter.com/apps/YOUR_APP_ID/show
-func SetConsumerSecret(consumer_secret string) {
-	oauthClient.Credentials.Secret = consumer_secret
+func SetConsumerSecret(consumerSecret string) {
+	oauthClient.Credentials.Secret = consumerSecret
 }
 
 // ReturnRateLimitError specifies behavior when the Twitter API returns a rate-limit error.
 // If set to true, the query will fail and return the error instead of automatically queuing and
 // retrying the query when the rate limit expires
-func (c *TwitterApi) ReturnRateLimitError(b bool) {
-	c.returnRateLimitError = b
+func (api *TwitterApi) ReturnRateLimitError(b bool) {
+	api.returnRateLimitError = b
 }
 
 // Enable query throttling using the tokenbucket algorithm
-func (c *TwitterApi) EnableThrottling(rate time.Duration, bufferSize int64) {
-	c.bucket = tokenbucket.NewBucket(rate, bufferSize)
+func (api *TwitterApi) EnableThrottling(rate time.Duration, bufferSize int64) {
+	api.bucket = tokenbucket.NewBucket(rate, bufferSize)
 }
 
 // Disable query throttling
-func (c *TwitterApi) DisableThrottling() {
-	c.bucket = nil
+func (api *TwitterApi) DisableThrottling() {
+	api.bucket = nil
 }
 
 // SetDelay will set the delay between throttled queries
 // To turn of throttling, set it to 0 seconds
-func (c *TwitterApi) SetDelay(t time.Duration) {
-	c.bucket.SetRate(t)
+func (api *TwitterApi) SetDelay(t time.Duration) {
+	api.bucket.SetRate(t)
 }
 
-func (c *TwitterApi) GetDelay() time.Duration {
-	return c.bucket.GetRate()
+func (api *TwitterApi) GetDelay() time.Duration {
+	return api.bucket.GetRate()
 }
 
 // SetBaseUrl is experimental and may be removed in future releases.
-func (c *TwitterApi) SetBaseUrl(baseUrl string) {
-	c.baseUrl = baseUrl
+func (api *TwitterApi) SetBaseUrl(baseUrl string) {
+	api.baseUrl = baseUrl
 }
 
 //AuthorizationURL generates the authorization URL for the first part of the OAuth handshake.
@@ -202,9 +202,9 @@ func cleanValues(v url.Values) url.Values {
 }
 
 // apiGet issues a GET request to the Twitter API and decodes the response JSON to data.
-func (c TwitterApi) apiGet(urlStr string, form url.Values, data interface{}) error {
+func (api TwitterApi) apiGet(urlStr string, form url.Values, data interface{}) error {
 	form = defaultValues(form)
-	resp, err := oauthClient.Get(c.HttpClient, c.Credentials, urlStr, form)
+	resp, err := oauthClient.Get(api.HttpClient, api.Credentials, urlStr, form)
 	if err != nil {
 		return err
 	}
@@ -213,8 +213,8 @@ func (c TwitterApi) apiGet(urlStr string, form url.Values, data interface{}) err
 }
 
 // apiPost issues a POST request to the Twitter API and decodes the response JSON to data.
-func (c TwitterApi) apiPost(urlStr string, form url.Values, data interface{}) error {
-	resp, err := oauthClient.Post(c.HttpClient, c.Credentials, urlStr, form)
+func (api TwitterApi) apiPost(urlStr string, form url.Values, data interface{}) error {
+	resp, err := oauthClient.Post(api.HttpClient, api.Credentials, urlStr, form)
 	if err != nil {
 		return err
 	}
@@ -223,8 +223,8 @@ func (c TwitterApi) apiPost(urlStr string, form url.Values, data interface{}) er
 }
 
 // apiDel issues a DELETE request to the Twitter API and decodes the response JSON to data.
-func (c TwitterApi) apiDel(urlStr string, form url.Values, data interface{}) error {
-	resp, err := oauthClient.Delete(c.HttpClient, c.Credentials, urlStr, form)
+func (api TwitterApi) apiDel(urlStr string, form url.Values, data interface{}) error {
+	resp, err := oauthClient.Delete(api.HttpClient, api.Credentials, urlStr, form)
 	if err != nil {
 		return err
 	}
@@ -233,8 +233,8 @@ func (c TwitterApi) apiDel(urlStr string, form url.Values, data interface{}) err
 }
 
 // apiPut issues a PUT request to the Twitter API and decodes the response JSON to data.
-func (c TwitterApi) apiPut(urlStr string, form url.Values, data interface{}) error {
-	resp, err := oauthClient.Put(c.HttpClient, c.Credentials, urlStr, form)
+func (api TwitterApi) apiPut(urlStr string, form url.Values, data interface{}) error {
+	resp, err := oauthClient.Put(api.HttpClient, api.Credentials, urlStr, form)
 	if err != nil {
 		return err
 	}
@@ -288,16 +288,16 @@ func NewApiError(resp *http.Response) *ApiError {
 
 //query executes a query to the specified url, sending the values specified by form, and decodes the response JSON to data
 //method can be either _GET or _POST
-func (c TwitterApi) execQuery(urlStr string, form url.Values, data interface{}, method int) error {
+func (api TwitterApi) execQuery(urlStr string, form url.Values, data interface{}, method int) error {
 	switch method {
 	case _GET:
-		return c.apiGet(urlStr, form, data)
+		return api.apiGet(urlStr, form, data)
 	case _POST:
-		return c.apiPost(urlStr, form, data)
+		return api.apiPost(urlStr, form, data)
 	case _DELETE:
-		return c.apiPost(urlStr, form, data)
+		return api.apiPost(urlStr, form, data)
 	case _PUT:
-		return c.apiPost(urlStr, form, data)
+		return api.apiPost(urlStr, form, data)
 	default:
 		return fmt.Errorf("HTTP method not yet supported")
 	}
@@ -306,39 +306,39 @@ func (c TwitterApi) execQuery(urlStr string, form url.Values, data interface{}, 
 // throttledQuery executes queries and automatically throttles them according to SECONDS_PER_QUERY
 // It is the only function that reads from the queryQueue for a particular *TwitterApi struct
 
-func (c *TwitterApi) throttledQuery() {
-	for q := range c.queryQueue {
+func (api *TwitterApi) throttledQuery() {
+	for q := range api.queryQueue {
 		url := q.url
 		form := q.form
 		data := q.data //This is where the actual response will be written
 		method := q.method
 
-		response_ch := q.response_ch
+		responseCh := q.response_ch
 
-		if c.bucket != nil {
-			<-c.bucket.SpendToken(1)
+		if api.bucket != nil {
+			<-api.bucket.SpendToken(1)
 		}
 
-		err := c.execQuery(url, form, data, method)
+		err := api.execQuery(url, form, data, method)
 
 		// Check if Twitter returned a rate-limiting error
 		if err != nil {
 			if apiErr, ok := err.(*ApiError); ok {
-				if isRateLimitError, nextWindow := apiErr.RateLimitCheck(); isRateLimitError && !c.returnRateLimitError {
-					c.Log.Info(apiErr.Error())
+				if isRateLimitError, nextWindow := apiErr.RateLimitCheck(); isRateLimitError && !api.returnRateLimitError {
+					api.Log.Info(apiErr.Error())
 
 					// If this is a rate-limiting error, re-add the job to the queue
 					// TODO it really should preserve order
 					go func(q query) {
-						c.queryQueue <- q
+						api.queryQueue <- q
 					}(q)
 
 					delay := nextWindow.Sub(time.Now())
 					<-time.After(delay)
 
 					// Drain the bucket (start over fresh)
-					if c.bucket != nil {
-						c.bucket.Drain()
+					if api.bucket != nil {
+						api.bucket.Drain()
 					}
 
 					continue
@@ -346,11 +346,11 @@ func (c *TwitterApi) throttledQuery() {
 			}
 		}
 
-		response_ch <- response{data, err}
+		responseCh <- response{data, err}
 	}
 }
 
 // Close query queue
-func (c *TwitterApi) Close() {
-	close(c.queryQueue)
+func (api *TwitterApi) Close() {
+	close(api.queryQueue)
 }
