@@ -55,3 +55,13 @@ func (api TwitterApi) postDirectMessagesImpl(v url.Values) (message DirectMessag
 	api.queryQueue <- query{api.baseUrl + "/direct_messages/new.json", v, &message, _POST, responseCh}
 	return message, (<-responseCh).err
 }
+
+// IndicateTyping will create a typing indicator
+// https://developer.twitter.com/en/docs/direct-messages/typing-indicator-and-read-receipts/api-reference/new-typing-indicator
+func (a TwitterApi) IndicateTyping(id int64) (err error) {
+	v := url.Values{}
+	v.Set("recipient_id", strconv.FormatInt(id, 10))
+	response_ch := make(chan response)
+	a.queryQueue <- query{a.baseUrl + "/direct_messages/indicate_typing.json", v, nil, _POST, response_ch}
+	return (<-response_ch).err
+}
